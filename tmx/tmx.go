@@ -62,16 +62,25 @@ type ID uint32
 
 // All structs have their fields exported, and you'll be on the safe side as long as treat them read-only (anyone want to write 100 getters?).
 type Map struct {
-	Version      string        `xml:"title,attr"`
-	Orientation  string        `xml:"orientation,attr"`
-	Width        int           `xml:"width,attr"`
-	Height       int           `xml:"height,attr"`
-	TileWidth    int           `xml:"tilewidth,attr"`
-	TileHeight   int           `xml:"tileheight,attr"`
-	Properties   []Property    `xml:"properties>property"`
-	Tilesets     []Tileset     `xml:"tileset"`
-	Layers       []Layer       `xml:"layer"`
-	ObjectGroups []ObjectGroup `xml:"objectgroup"`
+	Version         string        `xml:"version,attr"`
+	TiledVersion    string        `xml:"tiledVersion,attr"`
+	Orientation     string        `xml:"orientation,attr"`
+	RenderOrder     string        `xml:"renderorder,attr"`
+	BackgroundColor string        `xml:"backgroundcolor,attr"`
+	NextLayerID     string        `xml:"nextlayerid,attr"`
+	NextObjectID    string        `xml:"nextobjectid,attr"`
+	StaggerAxis     string        `xml:"staggeraxis,attr"`
+	StaggerIndex    string        `xml:"staggerindex,attr"`
+	Width           int           `xml:"width,attr"`
+	Height          int           `xml:"height,attr"`
+	TileWidth       int           `xml:"tilewidth,attr"`
+	TileHeight      int           `xml:"tileheight,attr"`
+	HexSideLength   int           `xml:"hexsidelength,attr"`
+	Properties      []Property    `xml:"properties>property"`
+	Tilesets        []Tileset     `xml:"tileset"`
+	Layers          []Layer       `xml:"layer"`
+	ObjectGroups    []ObjectGroup `xml:"objectgroup"`
+	ImageLayers     []ImageLayer  `xml:"imagelayer"`
 }
 
 type Tileset struct {
@@ -82,34 +91,61 @@ type Tileset struct {
 	TileHeight int        `xml:"tileheight,attr"`
 	Spacing    int        `xml:"spacing,attr"`
 	Margin     int        `xml:"margin,attr"`
+	Tilecount  int        `xml:"tilecount,attr"`
+	Columns    int        `xml:"columns,attr"`
 	Properties []Property `xml:"properties>property"`
 	Image      Image      `xml:"image"`
 	Tiles      []Tile     `xml:"tile"`
-	Tilecount  int        `xml:"tilecount,attr"`
-	Columns    int        `xml:"columns,attr"`
 }
 
 type Image struct {
 	Source string `xml:"source,attr"`
 	Trans  string `xml:"trans,attr"`
+	Format string `xml:"format,attr"`
 	Width  int    `xml:"width,attr"`
 	Height int    `xml:"height,attr"`
 }
 
 type Tile struct {
-	ID    ID    `xml:"id,attr"`
-	Image Image `xml:"image"`
+	ID          ID          `xml:"id,attr"`
+	Type        string      `xml:"type,attr"`
+	Probability float32     `xml:"probability,attr"`
+	Image       Image       `xml:"image"`
+	Properties  []Property  `xml:"properties>property"`
+	ObjectGroup ObjectGroup `xml:"objectgroup"`
 }
 
 type Layer struct {
+	ID           string         `xml:"id,attr"`
 	Name         string         `xml:"name,attr"`
 	Opacity      float32        `xml:"opacity,attr"`
 	Visible      bool           `xml:"visible,attr"`
+	X            int            `xml:"x,attr"`
+	Y            int            `xml:"y,attr"`
+	Width        int            `xml:"width,attr"`
+	Height       int            `xml:"height,attr"`
+	OffsetX      int            `xml:"offsetx,attr"`
+	OffsetY      int            `xml:"offsety,attr"`
 	Properties   []Property     `xml:"properties>property"`
 	Data         Data           `xml:"data"`
 	DecodedTiles []*DecodedTile // This is the attiribute you'd like to use, not Data. Tile entry at (x,y) is obtained using l.DecodedTiles[y*map.Width+x].
 	Tileset      *Tileset       // This is only set when the layer uses a single tileset and NilLayer is false.
 	Empty        bool           // Set when all entries of the layer are NilTile
+}
+
+type ImageLayer struct {
+	ID         string     `xml:"id,attr"`
+	Name       string     `xml:"name,attr"`
+	Opacity    float32    `xml:"opacity,attr"`
+	Visible    bool       `xml:"visible,attr"`
+	X          int        `xml:"x,attr"`
+	Y          int        `xml:"y,attr"`
+	Width      int        `xml:"width,attr"`
+	Height     int        `xml:"height,attr"`
+	OffsetX    int        `xml:"offsetx,attr"`
+	OffsetY    int        `xml:"offsety,attr"`
+	Properties []Property `xml:"properties>property"`
+	Image      Image      `xml:"image"`
 }
 
 type Data struct {
@@ -120,15 +156,24 @@ type Data struct {
 }
 
 type ObjectGroup struct {
+	ID         string     `xml:"id,attr"`
 	Name       string     `xml:"name,attr"`
 	Color      string     `xml:"color,attr"`
 	Opacity    float32    `xml:"opacity,attr"`
 	Visible    bool       `xml:"visible,attr"`
+	X          int        `xml:"x,attr"`
+	Y          int        `xml:"y,attr"`
+	Width      int        `xml:"width,attr"`
+	Height     int        `xml:"height,attr"`
+	OffsetX    int        `xml:"offsetx,attr"`
+	OffsetY    int        `xml:"offsety,attr"`
+	DrawOrder  string     `xml:"draworder,attr"`
 	Properties []Property `xml:"properties>property"`
 	Objects    []Object   `xml:"object"`
 }
 
 type Object struct {
+	ID         string     `xml:"id,attr"`
 	Name       string     `xml:"name,attr"`
 	Type       string     `xml:"type,attr"`
 	X          float64    `xml:"x,attr"`
@@ -136,7 +181,9 @@ type Object struct {
 	Width      float64    `xml:"width,attr"`
 	Height     float64    `xml:"height,attr"`
 	GID        int        `xml:"gid,attr"`
+	Rotation   int        `xml:"rotation,attr"`
 	Visible    bool       `xml:"visible,attr"`
+	Template   string     `xml:"template,attr"`
 	Polygons   []Polygon  `xml:"polygon"`
 	PolyLines  []PolyLine `xml:"polyline"`
 	Properties []Property `xml:"properties>property"`
@@ -152,6 +199,7 @@ type PolyLine struct {
 
 type Property struct {
 	Name  string `xml:"name,attr"`
+	Type  string `xml:"type,attr"`
 	Value string `xml:"value,attr"`
 }
 
